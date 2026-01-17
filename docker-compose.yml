@@ -1,0 +1,47 @@
+services:
+  # ---------------------------------------------------------
+  # SERVICE 1: Database for Metabase CONFIGURATION
+  # ---------------------------------------------------------
+  metabase-app-db:
+    image: postgres:15-alpine
+    container_name: mb-app-db
+    restart: always
+    environment:
+      POSTGRES_DB: ${MB_DB_NAME}
+      POSTGRES_USER: ${MB_DB_USER}
+      POSTGRES_PASSWORD: ${MB_DB_PASS}
+    volumes:
+      - ./docker/metabase-pg-data:/var/lib/postgresql/data
+    networks:
+      - analytics-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${MB_DB_USER} -d ${MB_DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ---------------------------------------------------------
+  # SERVICE 2: Metabase Analytics Platform
+  # ---------------------------------------------------------
+  metabase:
+    image: metabase/metabase:latest
+    container_name: supa-meta-budget-analytics
+    restart: always
+    ports:
+      - "3000:3000"
+    depends_on:
+      metabase-app-db:
+        condition: service_healthy
+    environment:
+      - MB_DB_TYPE=postgres
+      - MB_DB_DBNAME=${MB_DB_NAME}
+      - MB_DB_PORT=5432
+      - MB_DB_USER=${MB_DB_USER}
+      - MB_DB_PASS=${MB_DB_PASS}
+      - MB_DB_HOST=metabase-app-db
+    networks:
+      - analytics-net
+
+networks:
+  analytics-net:
+    driver: bridge

@@ -113,7 +113,15 @@ class BudgetService:
         filename = filename.replace(' ', '_')
         filename = re.sub(r'[^\w.-]', '', filename)
         return filename
+    def __enter__(self):
+        return self
+    
 
+    def __exit__(self, exc_type, exc_val, exc_tb):
+
+        if hasattr(self, 'close'):
+            self.close()
+        return False
     def upload_attachment(self, file_path: str, folder: str = "transactions") -> str:
         try:
             original_name = os.path.basename(file_path)
@@ -415,3 +423,28 @@ class BudgetService:
         except Exception:
             pass
         return {}
+    
+    def reload_cache(self) -> None:
+        self._categories_cache = self.category_repo.get_all()
+        wallets = self.wallet_repo.get_all_active()
+        self._wallets_cache = {str(w.id): w.wallet_name for w in wallets}
+
+    def get_cache_snapshot(self) -> Dict[str, Any]:
+        if hasattr(self.user_service, 'load_users'):
+             self.user_service.load_users()
+             
+        return {
+            "wallets": self._wallets_cache.copy(),
+            "categories": list(self._categories_cache),
+            "users": self.user_service.get_users()
+        }
+
+    def hydrate_cache(self, snapshot: Dict[str, Any]) -> None:
+        if not snapshot:
+            return
+        
+        if "wallets" in snapshot:
+            self._wallets_cache = snapshot["wallets"]
+            
+        if "categories" in snapshot:
+            self._categories_cache = snapshot["categories"]

@@ -5,6 +5,7 @@ import json
 import unicodedata
 import hashlib
 import colorsys
+import httpx 
 from typing import List, Dict, Any
 from uuid import UUID, uuid4
 from repositories.transaction_repo import TransactionRepository
@@ -15,11 +16,19 @@ from models.transaction import Transaction
 from core.config import settings
 from services.user_service import UserService
 
+_original_client_init = httpx.Client.__init__
+
+def _patched_client_init(self, *args, **kwargs):
+    if "http2" not in kwargs:
+        kwargs["http2"] = False
+    _original_client_init(self, *args, **kwargs)
+
+httpx.Client.__init__ = _patched_client_init
+
 class BudgetService:
     def __init__(self):
         if settings.SUPABASE_URL and not settings.SUPABASE_URL.endswith("/"):
             settings.SUPABASE_URL = f"{settings.SUPABASE_URL}/"
-
         self.transaction_repo = TransactionRepository()
         self.wallet_repo = WalletRepository()
         self.category_repo = CategoryRepository()

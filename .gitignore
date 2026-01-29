@@ -31,7 +31,7 @@ env/
 !.env.example
 
 user_prefs.json
-
+docker/metabase/metabase_config_dump.sql
 
 test_*.py
 temp_*.py

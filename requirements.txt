@@ -1,0 +1,6 @@
+PyQt6
+PyQt6-WebEngine
+supabase
+python-dotenv
+httpx
+psycopg2-binary

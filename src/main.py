@@ -1,3 +1,7 @@
+import ssl
+import http.client
+import socket
+
 import sys
 from pathlib import Path
 from PyQt6.QtWidgets import QApplication

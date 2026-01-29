@@ -5,6 +5,7 @@ import json
 import unicodedata
 import hashlib
 import colorsys
+import httpx 
 from typing import List, Dict, Any
 from uuid import UUID, uuid4
 from repositories.transaction_repo import TransactionRepository
@@ -15,11 +16,19 @@ from models.transaction import Transaction
 from core.config import settings
 from services.user_service import UserService
 
+_original_client_init = httpx.Client.__init__
+
+def _patched_client_init(self, *args, **kwargs):
+    if "http2" not in kwargs:
+        kwargs["http2"] = False
+    _original_client_init(self, *args, **kwargs)
+
+httpx.Client.__init__ = _patched_client_init
+
 class BudgetService:
     def __init__(self):
         if settings.SUPABASE_URL and not settings.SUPABASE_URL.endswith("/"):
             settings.SUPABASE_URL = f"{settings.SUPABASE_URL}/"
-
         self.transaction_repo = TransactionRepository()
         self.wallet_repo = WalletRepository()
         self.category_repo = CategoryRepository()
@@ -113,7 +122,15 @@ class BudgetService:
         filename = filename.replace(' ', '_')
         filename = re.sub(r'[^\w.-]', '', filename)
         return filename
+    def __enter__(self):
+        return self
+    
 
+    def __exit__(self, exc_type, exc_val, exc_tb):
+
+        if hasattr(self, 'close'):
+            self.close()
+        return False
     def upload_attachment(self, file_path: str, folder: str = "transactions") -> str:
         try:
             original_name = os.path.basename(file_path)
@@ -415,3 +432,28 @@ class BudgetService:
         except Exception:
             pass
         return {}
+    
+    def reload_cache(self) -> None:
+        self._categories_cache = self.category_repo.get_all()
+        wallets = self.wallet_repo.get_all_active()
+        self._wallets_cache = {str(w.id): w.wallet_name for w in wallets}
+
+    def get_cache_snapshot(self) -> Dict[str, Any]:
+        if hasattr(self.user_service, 'load_users'):
+             self.user_service.load_users()
+             
+        return {
+            "wallets": self._wallets_cache.copy(),
+            "categories": list(self._categories_cache),
+            "users": self.user_service.get_users()
+        }
+
+    def hydrate_cache(self, snapshot: Dict[str, Any]) -> None:
+        if not snapshot:
+            return
+        
+        if "wallets" in snapshot:
+            self._wallets_cache = snapshot["wallets"]
+            
+        if "categories" in snapshot:
+            self._categories_cache = snapshot["categories"]

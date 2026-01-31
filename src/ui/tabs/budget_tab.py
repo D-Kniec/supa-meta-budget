@@ -75,6 +75,10 @@ class BudgetTab(QWidget):
         self.search_input.setFixedWidth(280)
         self.search_input.setFixedHeight(36)
         self.search_input.setStyleSheet(SEARCH_INPUT_STYLE)
+        self.files_btn = QPushButton("📂")
+        self.files_btn.setFixedSize(46, 36)
+        self.files_btn.clicked.connect(self.open_attachment_browser)
+        self.toolbar.addWidget(self.files_btn)
         
         self.hide_pending_btn = QPushButton("⏳")
         self.hide_pending_btn.setCheckable(True)
@@ -427,20 +431,29 @@ class BudgetTab(QWidget):
 
         self.summary_label.setText(f"Bilans: {prefix}{balance_str} PLN")
         self.summary_label.setStyleSheet(SUMMARY_LABEL_TEMPLATE.format(color=color))
-
     def handle_select_attachment(self):
         path, _ = QFileDialog.getOpenFileName(self, "Wybierz plik", "", "Pliki (*.pdf *.jpg *.jpeg *.png)")
-        if path:
-            folder, ok = QInputDialog.getItem(self, "Wybierz folder", "Gdzie zapisać plik?", self.available_folders, 0, True)
-            
-            if ok and folder:
-                folder = folder.strip()
+        if not path:
+            return
+
+        current_cloud_folders = self.service.get_storage_folders()
+        
+        from ui.dialogs.folder_manager_dialog import FolderManagerDialog
+        
+        
+        dlg = FolderManagerDialog(current_cloud_folders, self)
+        
+        if dlg.exec():
+            folder = dlg.get_folder()
+            if folder:
                 if folder not in self.available_folders:
                     self.available_folders.append(folder)
                 
                 self.current_attachment = path
                 self.current_attachment_folder = folder
+                
                 self.f_attach_btn.setText("✅")
+                self.f_attach_btn.setToolTip(f"Plik: {os.path.basename(path)}\nFolder: {folder}")
                 self.f_attach_btn.setStyleSheet(BTN_ATTACH_ACTIVE_STYLE)
 
     def on_type_changed(self, type_text):
@@ -1340,21 +1353,49 @@ class BudgetTab(QWidget):
                     self.handle_full_refresh()
 
     def handle_manual_attachment(self, row):
-        tx_id = self.table.item(row, BudgetColumn.TYPE).data(Qt.ItemDataRole.UserRole)
-        path, _ = QFileDialog.getOpenFileName(self, "Dodaj załącznik", "", "Pliki (*.pdf *.jpg *.jpeg *.png)")
-        if path:
-            folder, ok = QInputDialog.getItem(self, "Wybierz folder", "Gdzie zapisać plik?", self.available_folders, 0, True)
-            if ok and folder:
-                folder = folder.strip()
-                if folder and folder not in self.available_folders:
+            tx_id = self.table.item(row, BudgetColumn.TYPE).data(Qt.ItemDataRole.UserRole)
+            path, _ = QFileDialog.getOpenFileName(self, "Dodaj załącznik", "", "Pliki (*.pdf *.jpg *.jpeg *.png)")
+            if path:
+                current_cloud_folders = self.service.get_storage_folders()
+                
+                from ui.dialogs.folder_manager_dialog import FolderManagerDialog
+                dlg = FolderManagerDialog(current_cloud_folders, self)
+                
+                if dlg.exec():
+                    folder = dlg.get_folder()
+                    if folder:
+                        folder = folder.strip()
+                        if folder not in self.available_folders:
+                            self.available_folders.append(folder)
+                        
+                        new_path = self.service.upload_attachment(path, folder)
+                        if new_path:
+                            ext = path.split('.')[-1]
+                            self.service.update_transaction_multiple_fields(tx_id, {"attachment_path": new_path, "attachment_type": ext})
+                            self.handle_full_refresh()
+
+    def handle_select_attachment(self):
+        path, _ = QFileDialog.getOpenFileName(self, "Wybierz plik", "", "Pliki (*.pdf *.jpg *.jpeg *.png)")
+        if not path:
+            return
+
+        current_cloud_folders = self.service.get_storage_folders()
+        
+        from ui.dialogs.folder_manager_dialog import FolderManagerDialog
+        dlg = FolderManagerDialog(current_cloud_folders, self)
+        
+        if dlg.exec():
+            folder = dlg.get_folder()
+            if folder:
+                if folder not in self.available_folders:
                     self.available_folders.append(folder)
                 
-                new_path = self.service.upload_attachment(path, folder)
-                if new_path:
-                    ext = path.split('.')[-1]
-                    self.service.update_transaction_multiple_fields(tx_id, {"attachment_path": new_path, "attachment_type": ext})
-                    self.handle_full_refresh()
-
+                self.current_attachment = path
+                self.current_attachment_folder = folder
+                
+                self.f_attach_btn.setText("✅")
+                self.f_attach_btn.setToolTip(f"Plik: {os.path.basename(path)}\nFolder: {folder}")
+                self.f_attach_btn.setStyleSheet(BTN_ATTACH_ACTIVE_STYLE)
     def handle_delete_wallet(self, wallet_id):
         msg = QMessageBox(self)
         msg.setWindowTitle("Usuwanie Portfela")
@@ -1382,3 +1423,7 @@ class BudgetTab(QWidget):
         elif msg.clickedButton() == btn_only:
             if self.service.delete_category(subcat_id, cascade=False): self.handle_full_refresh()
             else: QMessageBox.warning(self, "Błąd", "Kategoria w użyciu.")
+    def open_attachment_browser(self):
+        from ui.dialogs.attachment_browser import AttachmentBrowserDialog
+        dlg = AttachmentBrowserDialog(self.service, self)
+        dlg.exec()

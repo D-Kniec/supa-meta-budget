@@ -200,7 +200,27 @@ class BudgetService:
             return True
         except Exception:
             return False
+    def get_storage_folders(self) -> List[str]:
+        try:
+            res = self.supabase.storage.from_("attachments").list()
+            folders = [item['name'] for item in res if item.get('id') is None or item.get('metadata') is None]
+            defaults = ["Paragony", "Faktury", "Gwarancje", "Inne"]
+            combined = set(folders + defaults)
+            return sorted(list(combined))
+        except Exception:
+            return ["Paragony", "Faktury", "Gwarancje", "Inne"]
 
+    def get_files_in_folder(self, folder_name: str) -> List[Dict[str, Any]]:
+        try:
+            res = self.supabase.storage.from_("attachments").list(folder_name)
+            files = []
+            for item in res:
+                if item.get('name') != ".emptyFolderPlaceholder":
+                    item['full_path'] = f"{folder_name}/{item['name']}"
+                    files.append(item)
+            return files
+        except Exception:
+            return []
     def get_transaction_by_id(self, transaction_id: UUID) -> Dict[str, Any]:
         tx = self.transaction_repo.get_by_id(transaction_id)
         if not tx:

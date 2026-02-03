@@ -12,31 +12,31 @@ A desktop application designed for managing personal and household finances. It 
 
 The central hub for managing transactions, viewing daily entries, and monitoring account balances.
 
-![Budget Tab Interface](assets/img/UI Budget.png)
+![Budget Tab Interface](assets/img/UI%20Budget.png)
 
 ### 2. Goal Tracking
 
 Set and monitor monthly spending limits for specific categories.
 
-![Budget Goals Interface](assets/img/UI Budget Goals.png)
+![Budget Goals Interface](assets/img/UI%20Budget%20Goals.png)
 
 ### 3. Configuration
 
 Manage users, categories, and application settings.
 
-![Options Tab Interface](assets/img/UI Options.png)
+![Options Tab Interface](assets/img/UI%20Options.png)
 
 ### 4. Analytics Infrastructure
 
 Self-hosted Metabase integration for advanced data visualization.
 
-![Metabase Connection](assets/img/Metabase Connection.png)
+![Metabase Connection](assets/img/Metabase%20Connection.png)
 
 ### 5. Docker Environment
 
 Local container management for the analytics engine.
 
-![Docker Terminal Output](assets/img/Docker Terminal.png)
+![Docker Terminal Output](assets/img/Docker%20Terminal.png)
 
 ---
 
@@ -83,7 +83,7 @@ flowchart TB
         worker["DataLoaderWorker"]
   end
  subgraph Config["Configuration"]
-        env_vars[".env / core.config<br>(API Keys & URLs)"]
+        env_vars[".env / core.config<br>(API Keys &amp; URLs)"]
   end
  subgraph Services["Application Services"]
     direction TB

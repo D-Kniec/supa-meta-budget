@@ -1,51 +1,55 @@
-import os
-import json
+import sys
 from pathlib import Path
-from dotenv import load_dotenv
+from typing import Dict, Any
+from pydantic import Field, Json, ValidationError
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 ENV_PATH = BASE_DIR / ".env"
 
-load_dotenv(dotenv_path=ENV_PATH)
-
-class Config:
-    SUPABASE_URL = os.getenv("SUPABASE_URL")
-    SUPABASE_SECRET_KEY = os.getenv("SUPABASE_SECRET_KEY")
-    DEFAULT_USER_ID = os.getenv("DEFAULT_USER_ID")
-    DEBUG = os.getenv("DEBUG", "False").lower() == "true"
+class Settings(BaseSettings):
+    SUPABASE_URL: str
+    SUPABASE_ANON_KEY: str
+    SUPABASE_SECRET_KEY: str | None = None
     
-    MB_DB_USER = os.getenv("MB_DB_USER", "metabase_admin")
-    MB_DB_PASS = os.getenv("MB_DB_PASS")
-    MB_DB_NAME = os.getenv("MB_DB_NAME", "metabase_config")
-
-    DB_HOST = os.getenv("DB_HOST")
-    DB_PORT = os.getenv("DB_PORT", "5432")
-    DB_NAME = os.getenv("DB_NAME", "postgres")
-    DB_USER = os.getenv("DB_USER")   
-    DB_PASSWORD = os.getenv("DB_PASSWORD") 
-
-    USERS_MAPPING = {}
+    DEFAULT_USER_ID: str | None = None
+    DEBUG: bool = False
     
-    @classmethod
-    def load_users_map(cls):
-        raw_map = os.getenv("USERS_MAP", "{}")
-        try:
-            cls.USERS_MAPPING = json.loads(raw_map)
-        except json.JSONDecodeError:
-            print("CONFIG WARNING: Niepoprawny format JSON w USERS_MAP w .env")
-            cls.USERS_MAPPING = {}
+    MB_DB_USER: str = "metabase_admin"
+    MB_DB_PASS: str | None = None
+    MB_DB_NAME: str = "metabase_config"
 
-    @classmethod
-    def validate(cls):
-        required_vars = [
-            "SUPABASE_URL", "SUPABASE_SECRET_KEY", 
-            "DB_HOST", "DB_USER", "DB_PASSWORD"
-        ]
-        missing = [var for var in required_vars if not getattr(cls, var)]
+    DB_HOST: str
+    DB_PORT: int = 5432
+    DB_NAME: str = "postgres"
+    DB_USER: str
+    DB_PASSWORD: str
+
+    USERS_MAPPING: Json[Dict[str, Any]] = Field(default="{}")
+
+    model_config = SettingsConfigDict(
+        env_file=ENV_PATH,
+        env_file_encoding="utf-8",
+        extra="ignore"
+    )
+
+def get_settings() -> Settings:
+    if not ENV_PATH.exists():
+        print(f"\n[CRITICAL ERROR] Configuration file (.env) not found!")
+        print(f"Searched path: {ENV_PATH}")
+        print("\n>>> PLEASE RUN THE FOLLOWING COMMAND TO INITIALIZE THE PROJECT:")
+        print("    make setup\n")
+        sys.exit(1)
+
+    try:
+        return Settings()
+    except ValidationError as e:
+        print("\n[CONFIGURATION ERROR] Invalid or missing variables in .env:")
         
-        if missing:
-            raise ValueError(f"Brakujące zmienne w .env: {', '.join(missing)}")
-
-settings = Config()
-settings.validate()
-settings.load_users_map()
+        for error in e.errors():
+            field_name = " -> ".join(str(loc) for loc in error['loc'])
+            message = error['msg']
+            print(f" - {field_name}: {message}")
+            
+        print("\nPlease update your .env file manually or run 'make setup' to fix configuration.\n")
+        sys.exit(1)

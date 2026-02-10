@@ -663,7 +663,6 @@ class OptionsTab(QWidget):
                 QMessageBox.warning(self, "Błąd", "Nie udało się dodać portfela (błąd bazy lub walidacji).")
 
     def open_category_dialog(self):
-        # PRZEKAZUJEMY ISTNIEJĄCY SERWIS (self.service)
         dialog = AddCategoryDialog(self.service, self)
         if dialog.exec():
             data = dialog.get_data()
@@ -671,7 +670,6 @@ class OptionsTab(QWidget):
                 self.refresh_all()
 
     def open_edit_category_dialog(self, category_obj):
-        # PRZEKAZUJEMY ISTNIEJĄCY SERWIS (self.service)
         dialog = AddCategoryDialog(self.service, self, edit_mode=True)
         dialog.set_data(category_obj)
         if dialog.exec():

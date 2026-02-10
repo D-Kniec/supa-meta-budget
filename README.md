@@ -12,31 +12,31 @@ A desktop application designed for managing personal and household finances. It 
 
 The central hub for managing transactions, viewing daily entries, and monitoring account balances.
 
-![Budget Tab Interface](assets/img/UI Budget.png)
+![Budget Tab Interface](assets/img/UI%20Budget.png)
 
 ### 2. Goal Tracking
 
 Set and monitor monthly spending limits for specific categories.
 
-![Budget Goals Interface](assets/img/UI Budget Goals.png)
+![Budget Goals Interface](assets/img/UI%20Budget%20Goals.png)
 
 ### 3. Configuration
 
 Manage users, categories, and application settings.
 
-![Options Tab Interface](assets/img/UI Options.png)
+![Options Tab Interface](assets/img/UI%20Options.png)
 
 ### 4. Analytics Infrastructure
 
 Self-hosted Metabase integration for advanced data visualization.
 
-![Metabase Connection](assets/img/Metabase Connection.png)
+![Metabase Connection](assets/img/Metabase%20Connection.png)
 
 ### 5. Docker Environment
 
 Local container management for the analytics engine.
 
-![Docker Terminal Output](assets/img/Docker Terminal.png)
+![Docker Terminal Output](assets/img/Docker%20Terminal.png)
 
 ---
 
@@ -65,13 +65,14 @@ High-level overview of the system components, data flow, and infrastructure isol
 ```mermaid
 ---
 config:
-  layout: dagre
+  layout: elk
+  theme: neo
 ---
 flowchart TB
  subgraph Users["Users"]
     direction LR
-        n1["User A"]
-        n2["User B"]
+        n1(("User A"))
+        n2(("User B"))
   end
  subgraph UI["Desktop App"]
     direction TB
@@ -83,7 +84,7 @@ flowchart TB
         worker["DataLoaderWorker"]
   end
  subgraph Config["Configuration"]
-        env_vars[".env / core.config<br>(API Keys & URLs)"]
+        env_vars[".env / core.config<br>(API Keys &amp; URLs)"]
   end
  subgraph Services["Application Services"]
     direction TB
@@ -104,7 +105,7 @@ flowchart TB
         metabase_conf[("mb-app-db<br>(Config Internal)")]
   end
  subgraph Storage["Object Storage"]
-        s3_buckets["S3 Buckets<br>(Attachments)"]
+        s3_buckets[("S3 Buckets<br>(Attachments)")]
   end
  subgraph Dimensions["Dimensions"]
         dim_users[("dim_users")]
@@ -121,7 +122,7 @@ flowchart TB
   end
  subgraph Supabase["Supabase Backend (Cloud)"]
     direction TB
-        supabase_api["**Supabase API**<br>(PostgREST / GoTrue)"]
+        supabase_api["**Supabase API**<br>(PostgREST)"]
         Storage
         Database
   end
@@ -151,12 +152,6 @@ flowchart TB
     metabase <--> metabase_conf
     fact_transactions -- Direct SQL (Read) --> metabase
     Dimensions -- Direct SQL (Read) --> metabase
-
-    n1@{ icon: "fa:user", pos: "b"}
-    n2@{ icon: "fa:user", pos: "b"}
-    env_vars@{ icon: "fa:eye-slash"}
-    s3_buckets@{ icon: "fa:folder-open"}
-    supabase_api@{ icon: "fa:paper-plane"}
 ```
 
 ---
@@ -186,13 +181,10 @@ You will need specific credentials from your Supabase Project Dashboard. Have th
 If you have 'make' installed, you can set up everything with a single command.
 
 ```bash
-# 1. Install dependencies, run config wizard, and migrate DB
 make setup
 
-# 2. Start local infrastructure (Metabase)
 make docker-up
 
-# 3. Run the application
 make run
 ```
 
@@ -231,10 +223,8 @@ docker-compose up -d
 **Step 5: Launch Application**
 
 ```bash
-# Windows
 set PYTHONPATH=%cd%\src && python src/main.py
 
-# Linux/Mac
 export PYTHONPATH=$(pwd)/src && python src/main.py
 ```
 

@@ -1,3 +1,45 @@
+DARK_QSS = """
+    QMainWindow, QDialog, QWidget {
+        background-color: #1b1c1d;
+        color: #e0e0e0;
+        font-family: 'Segoe UI', Arial;
+        font-size: 13px;
+    }
+    QTabWidget::pane { border: 1px solid #333; background-color: #1b1c1d; }
+    QTabBar::tab {
+        background-color: #252526;
+        color: #888;
+        padding: 10px 25px;
+        border-top-left-radius: 4px;
+        border-top-right-radius: 4px;
+        margin-right: 2px;
+    }
+    QTabBar::tab:selected { background-color: #825fa2; color: white; font-weight: bold; }
+    
+    QLineEdit, QDoubleSpinBox, QDateEdit, QTextEdit {
+        background-color: #2d2d2d;
+        color: #ffffff;
+        border: 1px solid #444;
+        border-radius: 4px;
+        padding: 6px;
+    }
+    QLineEdit:focus { border: 1px solid #825fa2; }
+    
+    QPushButton {
+        background-color: #3d3d3d;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        font-weight: bold;
+    }
+    QPushButton:hover { background-color: #4d4d4d; }
+    
+    QScrollBar:vertical { border: none; background: #1b1c1d; width: 10px; }
+    QScrollBar::handle:vertical { background: #333; min-height: 20px; border-radius: 5px; }
+    QScrollBar::handle:vertical:hover { background: #825fa2; }
+"""
+
 SEARCH_INPUT_STYLE = """
     QLineEdit { 
         background-color: #252526; 
@@ -18,6 +60,73 @@ SEARCH_INPUT_ACTIVE_STYLE = """
         border-radius: 4px;
         padding: 0 10px;
         font-size: 13px;
+    }
+"""
+
+COMBOBOX_STYLE = """
+    QComboBox { 
+        background-color: #1e1e1e; 
+        border: 1px solid #444; 
+        border-radius: 6px; 
+        padding: 4px 8px; 
+        padding-right: 20px; /* Miejsce na strzałkę */
+        color: white; 
+    }
+    QComboBox:focus { border: 1px solid #825fa2; }
+    
+    QComboBox::drop-down {
+        subcontrol-origin: padding;
+        subcontrol-position: top right;
+        width: 25px;
+        border-left-width: 1px;
+        border-left-color: #333;
+        border-left-style: solid; /* Dodaje separator */
+        border-top-right-radius: 6px;
+        border-bottom-right-radius: 6px;
+        background-color: #252526; /* Nieco jaśniejsze tło dla przycisku */
+    }
+    
+    QComboBox::down-arrow {
+        image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+        width: 14px;
+        height: 14px;
+    }
+    
+    QComboBox QAbstractItemView {
+        background-color: #1e1e1e;
+        color: white;
+        selection-background-color: #825fa2;
+        border: 1px solid #444;
+        outline: none;
+    }
+"""
+
+ENTRY_FRAME_STYLE = """
+    QFrame#EntryFrame { 
+        background-color: #252526; 
+        border: 1px solid #3e3e42; 
+        border-radius: 12px; 
+    }
+    QLabel { 
+        color: #aaa; 
+        font-weight: 600; 
+        font-size: 10px; 
+        border: none; 
+        margin-bottom: 2px;
+        margin-top: 4px;
+    }
+    QDoubleSpinBox, QDateEdit, QComboBox, QLineEdit {
+        background-color: #1e1e1e;
+        border: 1px solid #444;
+        border-radius: 6px;
+        padding: 4px 8px;
+        color: white;
+        selection-background-color: #825fa2;
+        min-height: 28px;
+    }
+    QComboBox::drop-down { border: none; }
+    QDoubleSpinBox:focus, QDateEdit:focus, QComboBox:focus, QLineEdit:focus {
+        border: 1px solid #825fa2;
     }
 """
 
@@ -157,68 +266,10 @@ TABLE_STYLE = """
     }
 """
 
-ENTRY_FRAME_STYLE = """
-    QFrame#EntryFrame { 
-        background-color: #252526; 
-        border: 1px solid #3e3e42; 
-        border-radius: 12px; 
-    }
-    QLabel { 
-        color: #aaa; 
-        font-weight: 600; 
-        font-size: 10px; 
-        border: none; 
-        margin-bottom: 2px;
-        margin-top: 4px;
-    }
-    QDoubleSpinBox, QDateEdit, QComboBox, QLineEdit {
-        background-color: #1e1e1e;
-        border: 1px solid #444;
-        border-radius: 6px;
-        padding: 4px 8px;
-        color: white;
-        selection-background-color: #825fa2;
-        min-height: 28px;
-    }
-    QComboBox::drop-down { border: none; }
-    QDoubleSpinBox:focus, QDateEdit:focus, QComboBox:focus, QLineEdit:focus {
-        border: 1px solid #825fa2;
-    }
+LIST_WIDGET_STYLE = """
+    QListWidget { background-color: #1b1c1d; border: 1px solid #333; border-radius: 8px; color: #e0e0e0; padding: 5px; }
+    QListWidget::item { background: transparent; border-bottom: 1px solid #2a2a2a; }
 """
-
-COMBOBOX_STYLE = """
-    QComboBox { 
-        background-color: #1e1e1e; 
-        border: 1px solid #444; 
-        border-radius: 6px; 
-        padding: 4px 8px; 
-        color: white; 
-    }
-    QComboBox:focus { border: 1px solid #825fa2; }
-    QComboBox::drop-down { border: none; }
-    QComboBox QAbstractItemView {
-        background-color: #1e1e1e;
-        color: white;
-        selection-background-color: #825fa2;
-        border: 1px solid #444;
-    }
-"""
-
-INFO_LABEL_STYLE = "color: #ef5350; font-weight: bold; font-size: 11px; margin-left: 10px;"
-
-SUMMARY_LABEL_TEMPLATE = """
-    QLabel {{
-        background-color: #2d2d2d;
-        border: 1px solid {color};
-        color: {color};
-        border-radius: 4px;
-        padding: 0 15px;
-        font-weight: bold;
-        font-size: 13px;
-    }}
-"""
-
-LBL_SECTION_HEADER = "color: #999; font-weight: bold; font-size: 12px; text-transform: uppercase;"
 
 FRAME_CARD_STYLE = """
     QFrame { 
@@ -228,10 +279,14 @@ FRAME_CARD_STYLE = """
     }
 """
 
-LBL_TITLE_STYLE = "color: white; font-size: 18px; font-weight: bold; border: none; background: transparent;"
-LBL_SUBTITLE_STYLE = "color: #888; font-size: 12px; border: none; background: transparent;"
-SCROLL_TRANSPARENT_STYLE = "border: none; background-color: transparent;"
-WIDGET_TRANSPARENT_STYLE = "background-color: transparent;"
+CHIP_FRAME_STYLE = """
+    QFrame { 
+        background-color: #2b2b2b; 
+        border: 1px solid #3e3e3e; 
+        border-radius: 17px; 
+    }
+    QFrame:hover { border-color: #666; background-color: #333; }
+"""
 
 GROUPBOX_STYLED = """
     QGroupBox { 
@@ -245,18 +300,25 @@ GROUPBOX_STYLED = """
     QGroupBox::title { subcontrol-origin: margin; left: 10px; padding: 0 5px; }
 """
 
-LIST_WIDGET_STYLE = """
-    QListWidget { background-color: #1b1c1d; border: 1px solid #333; border-radius: 8px; color: #e0e0e0; padding: 5px; }
-    QListWidget::item { background: transparent; border-bottom: 1px solid #2a2a2a; }
-"""
+SCROLL_TRANSPARENT_STYLE = "border: none; background-color: transparent;"
+WIDGET_TRANSPARENT_STYLE = "background-color: transparent;"
 
-CHIP_FRAME_STYLE = """
-    QFrame { 
-        background-color: #2b2b2b; 
-        border: 1px solid #3e3e3e; 
-        border-radius: 17px; 
-    }
-    QFrame:hover { border-color: #666; background-color: #333; }
+# --- Labels & Text ---
+LBL_TITLE_STYLE = "color: white; font-size: 18px; font-weight: bold; border: none; background: transparent;"
+LBL_SUBTITLE_STYLE = "color: #888; font-size: 12px; border: none; background: transparent;"
+LBL_SECTION_HEADER = "color: #999; font-weight: bold; font-size: 12px; text-transform: uppercase;"
+INFO_LABEL_STYLE = "color: #ef5350; font-weight: bold; font-size: 11px; margin-left: 10px;"
+
+SUMMARY_LABEL_TEMPLATE = """
+    QLabel {{
+        background-color: #2d2d2d;
+        border: 1px solid {color};
+        color: {color};
+        border-radius: 4px;
+        padding: 0 15px;
+        font-weight: bold;
+        font-size: 13px;
+    }}
 """
 
 BTN_CHIP_EDIT_STYLE = """
@@ -317,45 +379,36 @@ BTN_BACKUP_RESTORE = """
     QPushButton { background-color: #c0392b; color: white; border-radius: 6px; font-weight: bold; }
     QPushButton:hover { background-color: #e74c3c; }
 """
-
-DARK_QSS = """
-    QMainWindow, QDialog, QWidget {
-        background-color: #1b1c1d;
-        color: #e0e0e0;
-        font-family: 'Segoe UI', Arial;
-        font-size: 13px;
+BTN_INLINE_DELETE = """
+    QPushButton { 
+        color: #666; 
+        background: transparent; 
+        border-radius: 11px; 
+        font-weight: bold; 
+        border: none; 
     }
-    QTabWidget::pane { border: 1px solid #333; background-color: #1b1c1d; }
-    QTabBar::tab {
-        background-color: #252526;
-        color: #888;
-        padding: 10px 25px;
-        border-top-left-radius: 4px;
-        border-top-right-radius: 4px;
-        margin-right: 2px;
+    QPushButton:hover { 
+        color: #ff8a80; 
+        background: #331d2c; 
     }
-    QTabBar::tab:selected { background-color: #825fa2; color: white; font-weight: bold; }
-    
-    QLineEdit, QDoubleSpinBox, QDateEdit, QTextEdit {
-        background-color: #2d2d2d;
-        color: #ffffff;
-        border: 1px solid #444;
-        border-radius: 4px;
-        padding: 6px;
-    }
-    QLineEdit:focus { border: 1px solid #825fa2; }
-    
+"""
+BTN_PRIMARY_STYLE = """
     QPushButton {
-        background-color: #3d3d3d;
+        background-color: #825fa2;
         color: white;
-        border: none;
-        padding: 8px 16px;
-        border-radius: 4px;
         font-weight: bold;
+        border-radius: 6px;
+        padding: 0 40px;
+        border: none;
     }
-    QPushButton:hover { background-color: #4d4d4d; }
-    
-    QScrollBar:vertical { border: none; background: #1b1c1d; width: 10px; }
-    QScrollBar::handle:vertical { background: #333; min-height: 20px; border-radius: 5px; }
-    QScrollBar::handle:vertical:hover { background: #825fa2; }
+    QPushButton:hover { background-color: #9374b3; }
+"""
+
+BTN_DISABLED_STYLE = """
+    QPushButton {
+        background-color: #4a4a4a;
+        color: #888;
+        border-radius: 6px;
+        border: none;
+    }
 """

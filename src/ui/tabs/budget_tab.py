@@ -1180,16 +1180,19 @@ class BudgetTab(QWidget):
             if to_item.text() != "-": to_item.setText("-")
 
     def on_item_changed(self, item):
-        if not item: return
+        if not item:
+            return
+            
         self.table.blockSignals(True)
         try:
             tx_id = item.data(Qt.ItemDataRole.UserRole)
-            row, col, val = item.row(), item.column(), item.text()
+            row = item.row()
+            col = item.column()
+            val = item.text()
             
             mapping = {
                 BudgetColumn.TYPE: "transaction_type", 
                 BudgetColumn.STATUS: "status", 
-                BudgetColumn.DATE: "transaction_date", 
                 BudgetColumn.AMOUNT: "amount", 
                 BudgetColumn.CATEGORY: "category", 
                 BudgetColumn.SUBCATEGORY: "subcategory", 
@@ -1203,7 +1206,15 @@ class BudgetTab(QWidget):
             
             success = False
 
-            if col == BudgetColumn.AMOUNT:
+            if col == BudgetColumn.DATE:
+                q_date = QDate.fromString(val, "yyyy-MM-dd")
+                if q_date.isValid():
+                    iso_date = q_date.toString(Qt.DateFormat.ISODate)
+                    success = self.service.update_transaction_field(tx_id, "transaction_date", iso_date)
+                else:
+                    success = False
+
+            elif col == BudgetColumn.AMOUNT:
                 val = val.replace(',', '.')
                 try:
                     float(val)
@@ -1248,6 +1259,9 @@ class BudgetTab(QWidget):
                     success = self.service.update_transaction_field(tx_id, f, val)
             
             if success:
+                if col == BudgetColumn.DATE:
+                    item.setData(Qt.ItemDataRole.EditRole, QDate.fromString(val, "yyyy-MM-dd"))
+                    
                 date_item = self.table.item(row, BudgetColumn.DATE)
                 if date_item:
                     date_item.setForeground(QColor("#81c784"))
@@ -1259,9 +1273,10 @@ class BudgetTab(QWidget):
                         self.info_label.setText("⚠️ Uwaga: Zmodyfikowano dzisiaj wpisy starsze niż 30 dni.")
 
             self._update_row_locks(row)
-        except Exception as e: 
-            print(f"UI UPDATE ERROR: {e}")
-        finally: 
+
+        except Exception:
+            pass
+        finally:
             self.table.blockSignals(False)
 
     def refresh_data(self):

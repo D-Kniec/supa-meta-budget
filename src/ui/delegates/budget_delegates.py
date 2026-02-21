@@ -223,6 +223,9 @@ class SubcategoryDelegate(QStyledItemDelegate):
         model.setData(index, editor.currentText(), Qt.ItemDataRole.EditRole)
 
 class DateDelegate(QStyledItemDelegate):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
     def createEditor(self, parent, option, index):
         editor = QDateEdit(parent)
         editor.setCalendarPopup(True)
@@ -230,8 +233,25 @@ class DateDelegate(QStyledItemDelegate):
         return editor
 
     def setEditorData(self, editor, index):
-        val = str(index.data(Qt.ItemDataRole.EditRole))
-        editor.setDate(QDate.fromString(val, "yyyy-MM-dd"))
+        value = index.model().data(index, Qt.ItemDataRole.EditRole)
+        
+        if not value:
+             value = index.model().data(index, Qt.ItemDataRole.DisplayRole)
+        
+        if isinstance(value, QDate):
+            editor.setDate(value)
+        elif isinstance(value, str):
+            d = QDate.fromString(value, "yyyy-MM-dd")
+            if d.isValid():
+                editor.setDate(d)
+            else:
+                editor.setDate(QDate.currentDate())
+        else:
+            editor.setDate(QDate.currentDate())
 
     def setModelData(self, editor, model, index):
-        model.setData(index, editor.date().toString("yyyy-MM-dd"), Qt.ItemDataRole.EditRole)
+        editor.interpretText()
+        date_val = editor.date()
+        date_str = date_val.toString("yyyy-MM-dd")
+        model.setData(index, date_str, Qt.ItemDataRole.EditRole)
+        model.setData(index, date_str, Qt.ItemDataRole.DisplayRole)

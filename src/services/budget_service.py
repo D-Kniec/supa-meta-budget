@@ -241,25 +241,34 @@ class BudgetService:
         }
 
     def update_transaction_multiple_fields(self, transaction_id: UUID, fields: Dict[str, Any]) -> bool:
-        try:
-            if "transaction_type" in fields:
-                new_type = fields.pop("transaction_type")
-                default_cat = next((c for c in self._categories_cache if c.type == new_type), None)
-                
-                if default_cat:
-                    fields["subcategory_fk"] = default_cat.subcategory_id
-                else:
-                    return False
+            try:
+                if "transaction_type" in fields:
+                    new_type = fields.pop("transaction_type")
+                    default_cat = next((c for c in self._categories_cache if c.type == new_type), None)
+                    
+                    if default_cat:
+                        fields["subcategory_fk"] = default_cat.subcategory_id
+                    else:
+                        return False
 
-            return self.transaction_repo.update(transaction_id, fields)
-        except Exception:
-            return False
+                if "author_id" in fields:
+                    fields["created_by_fk"] = fields.pop("author_id")
+                    
+                if "author" in fields:
+                    fields["created_by_fk"] = fields.pop("author")
+
+                return self.transaction_repo.update(transaction_id, fields)
+            except Exception:
+                return False
 
     def update_transaction_field(self, transaction_id: UUID, field_name: str, value: Any) -> bool:
         if field_name == "transaction_type":
             return self.update_transaction_multiple_fields(transaction_id, {"transaction_type": value})
+            
+        if field_name in ["author_id", "author"]:
+            field_name = "created_by_fk"
+            
         return self.update_transaction_multiple_fields(transaction_id, {field_name: value})
-
     def get_wallets_for_combo(self):
         return self.wallet_repo.get_all_active()
 

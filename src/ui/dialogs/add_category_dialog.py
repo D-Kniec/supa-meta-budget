@@ -16,7 +16,7 @@ from ui.styles import (
 )
 
 class AddCategoryDialog(QDialog):
-    def __init__(self, service_instance: Any, parent: Optional[QWidget] = None, edit_mode: bool = False):
+    def __init__(self, service_instance, parent: Optional[QWidget] = None, edit_mode: bool = False):
         super().__init__(parent)
         self.service = service_instance  
         self.edit_mode = edit_mode
@@ -35,13 +35,14 @@ class AddCategoryDialog(QDialog):
             
         self.validate_form()
 
-    def refresh_data_cache(self) -> None:
+    def refresh_data_cache(self):
         try:
             self.cached_categories = self.service.get_categories_for_combo()
-        except Exception:
+        except Exception as e:
+            print(f"Error loading categories: {e}")
             self.cached_categories = []
 
-    def init_ui(self) -> None:
+    def init_ui(self):
         layout = QVBoxLayout(self)
         layout.setSpacing(25)
         layout.setContentsMargins(30, 30, 30, 30)
@@ -151,6 +152,8 @@ class AddCategoryDialog(QDialog):
 
         self.save_btn = QPushButton("ZAPISZ" if self.edit_mode else "DODAJ")
         self.save_btn.setFixedHeight(45)
+        self.save_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.save_btn.setStyleSheet(BTN_PRIMARY_STYLE)
         self.save_btn.clicked.connect(self.accept)
 
         button_layout.addWidget(self.cancel_btn)
@@ -163,7 +166,7 @@ class AddCategoryDialog(QDialog):
         return label
 
     @pyqtSlot()
-    def validate_form(self) -> None:
+    def validate_form(self):
         cat_text = self.cat_combo.currentText().strip()
         sub_text = self.subcat_input.text().strip()
         
@@ -178,16 +181,16 @@ class AddCategoryDialog(QDialog):
             self.save_btn.setCursor(Qt.CursorShape.ArrowCursor)
 
     @pyqtSlot()
-    def attempt_submit(self) -> None:
+    def attempt_submit(self):
         if self.save_btn.isEnabled():
             self.accept()
 
-    def load_initial_data(self) -> None:
+    def load_initial_data(self):
         current_type = self.type_combo.currentText()
         self.on_type_changed(current_type)
 
     @pyqtSlot(str)
-    def on_type_changed(self, type_text: str) -> None:
+    def on_type_changed(self, type_text: str):
         self.cat_combo.blockSignals(True)
         self.cat_combo.clear()
         
@@ -215,7 +218,7 @@ class AddCategoryDialog(QDialog):
             self.subcat_list.clear()
 
     @pyqtSlot(str)
-    def update_subcategory_list(self, category_text: str) -> None:
+    def update_subcategory_list(self, category_text: str):
         self.validate_form()
         if self.edit_mode:
             return
@@ -273,7 +276,7 @@ class AddCategoryDialog(QDialog):
         layout.addWidget(del_btn)
         return container
 
-    def handle_inline_delete(self, subcat_id: int) -> None:
+    def handle_inline_delete(self, subcat_id: int):
         reply = QMessageBox.question(self, "Usuń", "Usunąć tę podkategorię?", 
                                     QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
         if reply == QMessageBox.StandardButton.Yes:
@@ -283,7 +286,7 @@ class AddCategoryDialog(QDialog):
             else:
                 QMessageBox.warning(self, "Błąd", "Nie można usunąć podkategorii.")
 
-    def pick_color(self) -> None:
+    def pick_color(self):
         color = QColorDialog.getColor(QColor(self.color_hex), self, "Wybierz Kolor")
         if color.isValid():
             self.color_hex = color.name()
@@ -291,6 +294,7 @@ class AddCategoryDialog(QDialog):
 
     @property
     def category_data(self) -> Dict[str, str]:
+        """Zwraca dane formularza jako słownik."""
         return {
             "type": self.type_combo.currentText(),
             "category": self.cat_combo.currentText().strip(),
@@ -298,7 +302,7 @@ class AddCategoryDialog(QDialog):
             "color": self.color_hex
         }
 
-    def set_data(self, category_obj: Any) -> None:
+    def set_data(self, category_obj: Any):
         self.type_combo.blockSignals(True)
         self.cat_combo.blockSignals(True)
 

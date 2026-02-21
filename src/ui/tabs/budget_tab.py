@@ -949,7 +949,6 @@ class BudgetTab(QWidget):
 
                 auth_color = QColor(entry.get("author_color", "#ffffff"))
                 auth_item = create_item(entry["author"], color=auth_color)
-                auth_item.setData(Qt.ItemDataRole.UserRole, entry.get("author_id"))
                 self.table.setItem(row_idx, BudgetColumn.AUTHOR, auth_item)
 
                 self.table.setItem(row_idx, BudgetColumn.CATEGORY, create_item(entry["category"]))
